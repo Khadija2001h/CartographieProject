@@ -1,0 +1,259 @@
+/* Import fonts (remove if not used) */
+@import '~@fontsource/inter/100.css';
+@import '~@fontsource/inter/200.css';
+@import '~@fontsource/inter/300.css';
+@import '~@fontsource/inter/400.css';
+@import '~@fontsource/inter/500.css';
+@import '~@fontsource/inter/600.css';
+@import '~@fontsource/inter/700.css';
+@import '~@fontsource/inter/800.css';
+@import '~@fontsource/inter/900.css';
+@import '~@fontsource/roboto-mono/300.css';
+@import '~@fontsource/roboto-mono/400.css';
+@import '~@fontsource/plus-jakarta-sans/600.css';
+@import '~@fontsource/plus-jakarta-sans/700.css';
+
+/* Variables */
+:root {
+  --icon-fontSize-sm: 1rem;
+  --icon-fontSize-md: 1.25rem;
+  --icon-fontSize-lg: 1.5rem;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--mui-palette-primary-main);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+}
+
+.services-section {
+  display: flex;
+  justify-content: space-between; /* Space between the cards */
+  align-items: stretch; /* Stretch cards to fill the section height */
+  padding: 40px 20px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin-top: 50px; /* Space from the previous section */
+  gap: 20px; /* Space between the cards */
+}
+
+.service-card {
+  text-align: center;
+  width: 300px; /* Fixed width for consistency */
+  flex: 1; /* Cards take equal space */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center items horizontally */
+  justify-content: space-between; /* Space out the content evenly */
+  padding: 20px; /* Padding inside the cards */
+  border: 1px solid #e0e0e0; /* Light border for separation */
+  border-radius: 8px; /* Rounded corners */
+  transition: transform 0.3s; /* Smooth scaling on hover */
+}
+
+.service-card:hover {
+  transform: scale(1.05); /* Scale up on hover */
+}
+
+.service-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+  display: block; /* Ensure the image is a block element */
+}
+
+.service-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #007cb9;
+}
+
+.service-description {
+  font-size: 16px; /* Adjusted font size */
+  color: #555; /* Dark gray for contrast */
+}
+
+.carouselContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  z-index: 1; /* Ensure parent container has a higher z-index */
+  margin-top: 100px;
+  
+}
+
+.navButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2; /* Ensure nav buttons are on top of other elements */
+}
+
+.navIcon {
+  width: 40px;
+  height: 40px;
+  color: #333;
+}
+
+.navButton:first-of-type {
+  left:10px; /* Adjust left position as needed */
+}
+
+.navButton:last-of-type {
+  right: -100px; /* Adjust right position as needed */
+}
+
+.carousel {
+  display: flex;
+  width: 100%;
+  padding: 0 50px; /* Add padding to ensure articles don't overlap with the navigation buttons */
+  box-sizing: border-box; /* Ensure padding doesn't affect total width */
+}
+
+.carouselItem {
+  flex: 0 0 33.33%;
+  max-width: 33.33%;
+  margin: 0 20px; /* Increased margin to create more space between articles */
+  box-sizing: border-box; /* Ensure margin doesn't affect total width */
+  transition: opacity 0.5s ease;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Increased shadow offset and spread */
+  z-index: 2;
+}
+
+.carouselItem.active {
+  opacity: 1;
+}
+
+.image {
+  width: 100%; /* Ensure the image fits within its container */
+  height: 200px; /* Fixed height for consistency */
+  object-fit: cover; /* Ensures images cover the area without distortion */
+  border-radius: 8px;
+  border: 2px solid #ddd;
+  box-shadow: none; /* Remove shadow */
+}
+
+.textContainer {
+  padding: 10px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.description {
+  font-size: 14px;
+  color: #555;
+  margin: 0 0 10px;
+  overflow: hidden; /* Hide overflow text */
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Show only 3 lines */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+.source {
+  color: #888;
+}
+
+.articleLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.articleLink:hover {
+  opacity: 0.8;
+}
+
+.aboutUsContainer {
+  padding-top: 200px; /* Adjust the value to fit your design */
+}
+/* global.css */
+
+html {
+  scroll-behavior: smooth;
+}
+/* styles/Footer.css */
+
+.footer {
+  background-color: #333;
+  color: #fff;
+  padding: 30px 0;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.footer-logo img {
+  width: 120px;
+  margin-bottom: 30px;
+}
+
+.footer-social {
+  display: flex;
+  justify-content: center;
+  gap: 30px; /* Increased gap for more spacing */
+  margin-bottom: 30px;
+}
+
+.footer-social a {
+  color: #fff;
+  font-size: 24px;
+  text-decoration: none;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  padding: 12px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-social a:hover {
+  color: #333;
+  background-color: #fff;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 50px; /* Increased gap for more spacing */
+  margin-bottom: 30px;
+}
+
+.footer-links a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px; /* Slightly larger font size */
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-copy {
+  font-size: 14px;
+  margin-top: 20px;
+}
