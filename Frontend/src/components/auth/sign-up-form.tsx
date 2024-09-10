@@ -4,7 +4,7 @@ import * as React from 'react';
 import RouterLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Swal from 'sweetalert2';  // Import de SweetAlert2
+import Swal from 'sweetalert2'; // Import de SweetAlert2 pour les alertes
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -28,12 +28,10 @@ const schema = zod.object({
   terms: zod.boolean().refine((value) => value, 'Vous devez accepter les termes et conditions'),
 });
 
-
 type Values = zod.infer<typeof schema>;
 
 const defaultValues = { firstname: '', lastname: '', email: '', password: '', terms: false } satisfies Values;
 
-// Composant du formulaire d'inscription
 export function SignUpForm(): React.JSX.Element {
   const router = useRouter();
   const [isPending, setIsPending] = React.useState<boolean>(false);
@@ -59,27 +57,24 @@ export function SignUpForm(): React.JSX.Element {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          setError('root', { type: 'server', message: errorData.message || 'Échec de l\'inscription' });
+          const errorText = await response.text();
+          const errorData = errorText ? JSON.parse(errorText) : { message: 'Échec de l\'authentification' };
+          setError('root', { type: 'server', message: errorData.message || 'Échec de l\'authentification' });
           setIsPending(false);
           return;
         }
 
-        const data = await response.json();
-        localStorage.setItem('authToken', data.token);  // Enregistrement du token
-
-        // Afficher une alerte de succès
+      
         Swal.fire({
           icon: 'success',
           title: 'Inscription réussie!',
           text: 'Vous avez été inscrit avec succès.',
-          confirmButtonText: 'Continuer'
+          confirmButtonText: 'Continuer',
         }).then(() => {
-          // Redirection après inscription réussie
           router.push("/auth/sign-in");
         });
-
       } catch (error: any) {
+        console.error('Erreur lors du traitement:', error);
         setError('root', { type: 'server', message: error.message || 'Une erreur inattendue est survenue.' });
         setIsPending(false);
       }
@@ -173,7 +168,6 @@ export function SignUpForm(): React.JSX.Element {
           </Button>
         </Stack>
       </form>
-      <Alert color="warning">Les utilisateurs créés ne sont pas persistés</Alert>
     </Stack>
   );
 }

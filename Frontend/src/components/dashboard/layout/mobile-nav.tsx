@@ -59,7 +59,7 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
     >
       <Stack spacing={2} sx={{ p: 3 }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          <Logo color="light" height={32} width={122} />
+          <Logo color="light" height={70} width={150} />
         </Box>
         <Box
           sx={{
@@ -74,13 +74,12 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
         >
           <Box sx={{ flex: '1 1 auto' }}>
             <Typography color="var(--mui-palette-neutral-400)" variant="body2">
-              Workspace
+              Dashboard
             </Typography>
             <Typography color="inherit" variant="subtitle1">
-              Devias
+              Admin Space
             </Typography>
           </Box>
-          <CaretUpDownIcon />
         </Box>
       </Stack>
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
@@ -90,24 +89,16 @@ export function MobileNav({ open, onClose }: MobileNavProps): React.JSX.Element 
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       <Stack spacing={2} sx={{ p: '12px' }}>
         
-        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-          <Box
-            component="img"
-            alt="Pro version"
-            src="/assets/devias-kit-pro.png"
-            sx={{ height: 'auto', width: '160px' }}
-          />
-        </Box>
-        <Button
+      <Button
           component="a"
           endIcon={<ArrowSquareUpRightIcon fontSize="var(--icon-fontSize-md)" />}
           fullWidth
-          href="https://material-kit-pro-react.devias.io/"
+          href="/auth/sign-in"
           sx={{ mt: 2 }}
           target="_blank"
           variant="contained"
         >
-          Pro version
+           Logout
         </Button>
       </Stack>
     </Drawer>

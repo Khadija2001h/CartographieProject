@@ -8,13 +8,12 @@ import Typography from '@mui/material/Typography';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
-import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 import { CustomersTable } from '@/components/dashboard/customer/customers-table';
 import AddEntreprise from '@/components/dashboard/customer/AddEntreprise';
 import { EntrepriseDetails } from '@/components/dashboard/customer/entreprise-detail';
 
 const customers = [
-  // Vos données de clients
+  // Vos données de clients (si nécessaire)
 ] satisfies Customer[];
 
 export function Page(): React.JSX.Element {
@@ -33,6 +32,12 @@ export function Page(): React.JSX.Element {
 
   const paginatedCustomers = applyPagination(customers, page, rowsPerPage);
 
+  // Fonction pour gérer l'exportation du tableau
+  const handleExport = () => {
+    const exportToExcelEvent = new CustomEvent('exportToExcel');
+    window.dispatchEvent(exportToExcelEvent);
+  };
+
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={3}>
@@ -42,7 +47,7 @@ export function Page(): React.JSX.Element {
             <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
               Import
             </Button>
-            <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>
+            <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />} onClick={handleExport}>
               Export
             </Button>
           </Stack>
@@ -53,7 +58,7 @@ export function Page(): React.JSX.Element {
           </Button>
         </div>
       </Stack>
-      
+
       <CustomersTable
         count={paginatedCustomers.length}
         page={page}

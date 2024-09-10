@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'next/navigation';
@@ -33,10 +34,17 @@ export default function Page() {
   const [filter, setFilter] = useState('all'); // Filter state
   const searchParams = useSearchParams();
 
+  const getAuthToken = () => localStorage.getItem('authToken');
+
   useEffect(() => {
     const fetchSupportRequests = async () => {
       try {
-        const response = await axios.get('http://localhost:9192/api/support');
+        const token = getAuthToken();
+        const response = await axios.get('http://localhost:9192/api/support', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
         const requests = response.data.map((request, index) => ({ ...request, order: index }));
         setSupportRequests(requests.reverse()); // Reverse the array to show the newest first
         setFilteredRequests(requests.reverse());
@@ -53,7 +61,12 @@ export default function Page() {
     if (searchParams.get('open') === 'true' && supportRequestId) {
       const fetchSupportRequest = async () => {
         try {
-          const response = await axios.get(`http://localhost:9192/api/support/${supportRequestId}`);
+          const token = getAuthToken();
+          const response = await axios.get(`http://localhost:9192/api/support/${supportRequestId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
           setCurrentRequest(response.data);
           setOpen(true);
         } catch (error) {
@@ -88,13 +101,22 @@ export default function Page() {
 
   const handleResponse = async () => {
     try {
+      const token = getAuthToken();
       await axios.post('http://localhost:9192/api/support/respond', {
         id: currentRequest.id,
         message: responseMessage,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       handleClose(); // Close the dialog after sending the response
       alert('Réponse envoyée avec succès !');
-      const response = await axios.get('http://localhost:9192/api/support');
+      const response = await axios.get('http://localhost:9192/api/support', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const requests = response.data.map((request, index) => ({ ...request, order: index }));
       setSupportRequests(requests.reverse()); // Re-reverse after response
       setFilteredRequests(requests.reverse());
@@ -106,9 +128,18 @@ export default function Page() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:9192/api/support/delete/${id}`);
+      const token = getAuthToken();
+      await axios.delete(`http://localhost:9192/api/support/delete/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       alert('Message supprimé avec succès !');
-      const response = await axios.get('http://localhost:9192/api/support');
+      const response = await axios.get('http://localhost:9192/api/support', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const requests = response.data.map((request, index) => ({ ...request, order: index }));
       setSupportRequests(requests.reverse()); // Re-reverse after delete
       setFilteredRequests(requests.reverse());

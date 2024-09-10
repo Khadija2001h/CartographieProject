@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -15,17 +16,12 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
+import { paths } from '@/paths';
 
 const schema = zod.object({
   email: zod.string().min(1, { message: 'Email is required' }).email({ message: 'Invalid email address' }),
   password: zod.string().min(1, { message: 'Password is required' }),
 });
-
-const paths = {
-  dashboard: '/dashboard',  // Assurez-vous que c'est bien une chaîne
-  // autres chemins...
-};
-
 
 type FormValues = zod.infer<typeof schema>;
 
@@ -48,52 +44,52 @@ export function SignInForm(): React.JSX.Element {
     resolver: zodResolver(schema),
   });
 
+  // Effacer le localStorage lorsque le composant est monté
+  React.useEffect(() => {
+    localStorage.clear();
+  }, []);
+
   const onSubmit = React.useCallback(
     async (values: FormValues): Promise<void> => {
       setIsPending(true);
 
       try {
-        // Récupérer le token depuis localStorage
-        const token = localStorage.getItem('authToken');
-        
-        if (!token) {
-          setError('root', {
-            type: 'no-token',
-            message: 'No token found. Please sign up first.',
-          });
-          setIsPending(false);
-          return;
-        }
         const response = await fetch('http://localhost:9192/api/v1/auth/authenticate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // Utilisation des backticks pour inclure le token
           },
           body: JSON.stringify(values),
         });
-        
 
         if (!response.ok) {
-          const errorData = await response.json();
+          const errorText = await response.text();
+          console.error('Erreur brute:', errorText);
           setError('root', {
             type: 'server',
-            message: errorData.message || 'Failed to sign in. Please try again.',
+            message: 'Failed to sign in. Please try again.',
           });
           setIsPending(false);
           return;
         }
 
         const data = await response.json();
-        localStorage.setItem('authToken', data.token); // Mise à jour du token si nécessaire
+        localStorage.setItem('authToken', data.token); // Stocker le token après une connexion réussie
 
-        // Redirection après authentification réussie
-        router.replace('/dashboard');
-      } catch (error) {
+        // Rediriger vers le dashboard uniquement après la soumission réussie
+        localStorage.setItem('role', data.role);
+        if(data.role === 'ADMIN'){
+          router.replace(paths.dashboard.overview);
+        }  if(data.role === 'USER'){
+          router.replace(paths.ui.user);
+        }
+       } catch (error) {
+        console.error('Erreur lors du traitement:', error);
         setError('root', {
           type: 'server',
           message: (error as Error).message || 'An unexpected error occurred. Please try again.',
         });
+      } finally {
         setIsPending(false);
       }
     },

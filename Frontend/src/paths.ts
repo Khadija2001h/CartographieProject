@@ -13,8 +13,9 @@ export const paths = {
     settings: '/dashboard/settings',
   },
   ui: {
-    user: 'ui/user',
-     home: "ui/home",
+    user: '/ui/user',
+     home: "ui/home"
+     ,
   },
   errors: {
     notFound: '/errors/not-found',

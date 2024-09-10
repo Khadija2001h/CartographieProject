@@ -78,11 +78,22 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
     const [newFormeJuridique, setNewFormeJuridique] = useState<string>('');
     const [secteursActivite, setSecteursActivite] = useState<SecteurActivite[]>([]);
     const [newSecteurActivite, setNewSecteurActivite] = useState<string>('');
-
+    const isDateBeforeCurrent = (date: string): boolean => {
+        return new Date(date) < new Date();
+    };
+    
     useEffect(() => {
         const fetchFormesJuridiques = async () => {
-            try {
-                const response = await axios.get('http://localhost:9192/api/formesJuridiques');
+            try {        const token = localStorage.getItem('authToken');
+
+                const response = await axios.get('http://localhost:9192/api/formesJuridiques', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                    },
+          
+                  });
+          
                 setFormesJuridiques(response.data);
             } catch (error) {
                 console.error('Erreur lors de la récupération des formes juridiques', error);
@@ -93,8 +104,16 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
 
     useEffect(() => {
         const fetchSecteursActivite = async () => {
-            try {
-                const response = await axios.get('http://localhost:9192/api/secteursDactivite');
+            try {        const token = localStorage.getItem('authToken');
+
+                const response = await axios.get('http://localhost:9192/api/secteursDactivite', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                    },
+          
+                  });
+          
                 setSecteursActivite(response.data);
             } catch (error) {
                 console.error('Erreur lors de la récupération des secteurs d\'activité', error);
@@ -167,7 +186,16 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
 
     const handleAddFormeJuridique = async () => {
         try {
-            const response = await axios.post('http://localhost:9192/api/formesJuridiques', { nom: newFormeJuridique });
+            const token = localStorage.getItem('authToken');
+
+            const response = await axios.post('http://localhost:9192/api/formesJuridiques', { nom: newFormeJuridique }, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+      
+              });
+      
             setFormesJuridiques([...formesJuridiques, response.data]);
             setFormData({ ...formData, formeJuridiqueId: response.data.id });
             setNewFormeJuridique('');
@@ -178,7 +206,16 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
 
     const handleAddSecteurActivite = async () => {
         try {
-            const response = await axios.post('http://localhost:9192/api/secteursDactivite', { nom: newSecteurActivite });
+            const token = localStorage.getItem('authToken');
+
+            const response = await axios.post('http://localhost:9192/api/secteursDactivite', { nom: newSecteurActivite }, {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+      
+              });
+      
             setSecteursActivite([...secteursActivite, response.data]);
             setFormData({ ...formData, secteurId: response.data.id });
             setNewSecteurActivite('');
@@ -189,6 +226,19 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+    
+        const { dateCreation, dateCessationActivite } = formData;
+    
+        // Vérifiez que les dates ne sont pas vides et sont avant la date courante
+        if (!dateCreation || !isDateBeforeCurrent(dateCreation)) {
+            alert('La date de création doit être avant la date courante.');
+            return;
+        }
+    
+        if (dateCessationActivite && !isDateBeforeCurrent(dateCessationActivite)) {
+            alert('La date de cessation d\'activité doit être avant la date courante.');
+            return;
+        }
     
         const formDataToSend = new FormData();
         Object.entries(formData).forEach(([key, value]) => {
@@ -216,9 +266,13 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
         });
     
         try {
+            const token = localStorage.getItem('authToken');
+    
             const response = await axios.post('http://localhost:9192/api/entreprises/add', formDataToSend, {
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`,
                 }
             });
             console.log(response.data);
@@ -365,22 +419,28 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
                             value={formData.longitude}
                             onChange={handleChange}
                         />
-                        <TextField
-                            fullWidth
-                            type="date"
-                            label="Date de création"
-                            name="dateCreation"
-                            value={formData.dateCreation}
-                            onChange={handleChange}
-                        />
-                        <TextField
-                            fullWidth
-                            type="date"
-                            label="Date de cessation d'activité"
-                            name="dateCessationActivite"
-                            value={formData.dateCessationActivite}
-                            onChange={handleChange}
-                        />
+                      <TextField
+    name="dateCreation"
+    label="Date de Création"
+    type="date"
+    value={formData.dateCreation}
+    onChange={handleChange}
+    InputLabelProps={{
+        shrink: true,
+    }}
+    required
+/>
+<TextField
+    name="dateCessationActivite"
+    label="Date de Cessation d'Activité"
+    type="date"
+    value={formData.dateCessationActivite}
+    onChange={handleChange}
+    InputLabelProps={{
+        shrink: true,
+    }}
+/>
+
                         <TextField
                             fullWidth
                             label="Logo"

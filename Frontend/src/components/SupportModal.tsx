@@ -24,6 +24,7 @@ const SupportModal = ({ open, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      
       const response = await axios.post('http://localhost:9192/api/support/submit', formData);
       console.log('Support request submitted:', response.data);
       setIsSubmitted(true);

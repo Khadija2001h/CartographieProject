@@ -49,8 +49,10 @@
     "react-leaflet-search": "^2.0.1",
     "react-player": "^2.16.0",
     "react-router-dom": "^6.26.0",
-    "sweetalert2": "^11.12.4",
+    "sweetalert2": "^11.6.13",
     "web-vitals": "^4.2.2",
+    "xlsx": "^0.18.5",
+    "xlsx-style": "^0.8.13",
     "zod": "3.23.8"
   },
   "devDependencies": {

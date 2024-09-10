@@ -15,8 +15,19 @@ export const NotificationPopover = ({ anchorEl, open, onClose, setCurrentRequest
     if (open) {
       const fetchNotifications = async () => {
         try {
-          const response = await axios.get('http://localhost:9192/api/notifications');
+          const token = localStorage.getItem('authToken');  // Récupération du token
+          if (!token) {
+            console.error('Token not found');
+            return;
+          }
+
+          const response = await axios.get('http://localhost:9192/api/notifications', {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
           setNotifications(response.data);
+
           // Définir si de nouvelles notifications existent
           const unreadCount = response.data.filter(notification => !notification.isRead).length;
           setHasNewNotifications(unreadCount > 0);
@@ -33,14 +44,25 @@ export const NotificationPopover = ({ anchorEl, open, onClose, setCurrentRequest
     if (!open && hasNewNotifications) {
       const markAllAsRead = async () => {
         try {
+          const token = localStorage.getItem('authToken');  // Récupération du token
+          if (!token) {
+            console.error('Token not found');
+            return;
+          }
+
           const unreadNotifications = notifications.filter(notification => !notification.isRead);
           for (const notification of unreadNotifications) {
-            await axios.post(`http://localhost:9192/api/notifications/${notification.id}/markAsRead`);
+            await axios.post(`http://localhost:9192/api/notifications/${notification.id}/markAsRead`, {}, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
           }
+
           // Mettre à jour l'état des notifications après les avoir marquées comme lues
           const updatedNotifications = notifications.map(notification => ({
             ...notification,
-            isRead: true
+            isRead: true,
           }));
           setNotifications(updatedNotifications);
           setHasNewNotifications(false);
@@ -55,16 +77,30 @@ export const NotificationPopover = ({ anchorEl, open, onClose, setCurrentRequest
 
   const handleNotificationClick = async (notification) => {
     try {
-      await axios.post(`http://localhost:9192/api/notifications/${notification.id}/markAsRead`);
+      const token = localStorage.getItem('authToken');  // Récupération du token
+      if (!token) {
+        console.error('Token not found');
+        return;
+      }
 
-      const response = await axios.get(`http://localhost:9192/api/support/${notification.supportRequestId}`);
+      await axios.post(`http://localhost:9192/api/notifications/${notification.id}/markAsRead`, {}, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const response = await axios.get(`http://localhost:9192/api/support/${notification.supportRequestId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const supportRequest = response.data;
 
       const queryString = new URLSearchParams({
         open: 'true',
-        supportRequestId: notification.supportRequestId
+        supportRequestId: notification.supportRequestId,
       }).toString();
-      
+
       router.push(`/dashboard/settings?${queryString}`);
 
       setCurrentRequest(supportRequest);

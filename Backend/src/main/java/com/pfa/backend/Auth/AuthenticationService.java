@@ -19,8 +19,12 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
+
+        if (repository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("L'email est déjà utilisé, Veillez choisir une autre adresse mail!");
+        }  var user = User.builder()
                 .firstname(request.getFirstname())
                 .lastname(request.getLastname())
                 .email(request.getEmail())
@@ -28,9 +32,10 @@ public class AuthenticationService {
                 .role(Role.USER)
                 .build();
         repository.save(user);
-        var jwtToken =jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .role(user.getRole().name())  // Inclure le rôle dans la réponse
                 .build();
     }
 
@@ -38,13 +43,32 @@ public class AuthenticationService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword())
+                        request.getPassword()
+                )
         );
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        var jwtToken =jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .role(user.getRole().name())  // Inclure le rôle dans la réponse
                 .build();
+    }
+
+    public void registerAdmin() {
+        if (repository.findByEmail("admine@gmail.com").isEmpty()) {
+            var admin = User.builder()
+                    .firstname("admine")
+                    .lastname("admine")
+                    .email("admine@gmail.com")
+                    .password(passwordEncoder.encode("123456"))
+                    .role(Role.ADMIN)
+                    .build();
+            repository.save(admin);
+        }
+    }
+    public User findByEmail(String email) {
+        return repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur non trouvé"));
     }
 }

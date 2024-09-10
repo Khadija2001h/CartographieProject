@@ -53,7 +53,7 @@ const Navbar = () => {
           </Link>
         </li>
         <li style={{ margin: '0 20px' }}>
-          <Link href="/get-started" style={{ textDecoration: 'none' }}>
+          <Link href="/auth/sign-in" style={{ textDecoration: 'none' }}>
             <button style={{ fontSize: '20px', padding: '15px 30px', backgroundColor: '#007cb9', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
               Get Started
             </button>

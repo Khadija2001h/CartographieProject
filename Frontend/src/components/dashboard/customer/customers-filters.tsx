@@ -41,7 +41,15 @@ export function CustomersFilters({ onFilterChange }: CustomersFiltersProps): Rea
   React.useEffect(() => {
     const fetchFormesJuridiques = async () => {
       try {
-        const response = await axios.get('http://localhost:9192/api/formesJuridiques');
+        const token = localStorage.getItem('authToken');
+
+        const response = await axios.get('http://localhost:9192/api/formesJuridiques', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+
+        });
+
         const data: FormeJuridique[] = response.data;
         console.log('Formes Juridiques récupérées:', data);
         setFormesJuridiques(data);
@@ -52,7 +60,14 @@ export function CustomersFilters({ onFilterChange }: CustomersFiltersProps): Rea
 
     const fetchSecteursActivite = async () => {
       try {
-        const response = await axios.get('http://localhost:9192/api/secteursDactivite');
+        const token = localStorage.getItem('authToken');
+
+        const response = await axios.get('http://localhost:9192/api/secteursDactivite', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
         const data: SecteurActivite[] = response.data;
         console.log('Secteurs d\'activité récupérés:', data);
         setSecteursActivite(data);
@@ -63,7 +78,14 @@ export function CustomersFilters({ onFilterChange }: CustomersFiltersProps): Rea
 
     const fetchVilles = async () => {
       try {
-        const response = await axios.get('http://localhost:9192/api/entreprises/villes');
+        const token = localStorage.getItem('authToken');
+
+        const response = await axios.get('http://localhost:9192/api/entreprises/villes', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
         setVilles(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des villes', error);

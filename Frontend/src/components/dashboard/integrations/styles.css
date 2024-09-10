@@ -1,0 +1,92 @@
+body {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.25; /* Réduction de l'espacement entre les lignes */
+  }
+  
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    border: 1px solid #c4c4c4;
+  }
+  
+  .history-table th, .history-table td {
+    border: 1px solid #c4c4c4;
+    padding: 8px;
+    text-align: left;
+    font-size: 0.875rem; /* 14px */
+  }
+  
+  .history-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+  
+  .history-table tr:nth-of-type(even) {
+    background-color: #f9f9f9;
+  }
+  
+  table {
+    width: 100%;
+  }
+  
+  .map-border {
+    border: 2px solid #c4c4c4;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 16px auto; /* Centre la bordure */
+    width: 70%; /* Limite la taille de la bordure */
+    max-width: 800px; /* Largeur maximale */
+  }
+  
+  .map-border .leaflet-container {
+    width: 100%;
+    height: 400px; /* Taille fixe pour la hauteur de la carte */
+  }
+  
+
+
+
+
+  .navbar {
+    background-color: #fff; /* Arrière-plan blanc */
+    padding: 1rem 2rem; /* Espacement interne : 1rem en haut et en bas, 2rem à gauche et à droite */
+    border-bottom: 1px solid #ddd; /* Bordure fine en bas */
+    border-radius: 1rem; /* Arrondir les coins de la navbar */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Ombre subtile pour l'effet de profondeur */
+    margin-bottom: 40px; 
+  }
+  
+  /* Style pour les éléments de la liste */
+  .navbar ul {
+    list-style: none; /* Supprimer les puces de liste */
+    display: flex; /* Disposer les éléments en ligne */
+    gap: 1.5rem; /* Espacement entre les éléments (1.5rem) */
+    margin: 0; /* Supprimer la marge par défaut */
+    padding: 0; /* Supprimer le padding par défaut */
+  }
+  
+  /* Style pour chaque élément de la liste */
+  .navbar li {
+    display: inline; /* Afficher les éléments en ligne */
+  }
+  
+  /* Style pour les liens */
+  .navbar a {
+    color: #333; /* Couleur du texte pour le contraste */
+    text-decoration: none; /* Supprimer la décoration de texte par défaut */
+    padding: 0.5rem; /* Espacement interne des liens */
+    transition: color 0.3s ease; /* Transition douce pour les changements de couleur */
+  }
+  
+  /* Style pour les liens au survol */
+  .navbar a:hover {
+    text-decoration: underline; /* Souligner les liens au survol */
+  }
+  
+  /* Style pour le lien actif */
+  .navbar a.active {
+    color: #007bff; /* Couleur du texte pour le lien actif (ex : bleu) */
+    font-weight: bold; /* Mettre le texte en gras pour le lien actif */
+  }
+  

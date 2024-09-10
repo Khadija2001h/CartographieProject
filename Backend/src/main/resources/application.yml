@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     username: root
-    url: jdbc:mysql://localhost:3306/Cartographiedb
+    url: jdbc:mysql://localhost:3306/Cartographie
     password: Root123root
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:

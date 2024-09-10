@@ -86,7 +86,14 @@ export function EntrepriseDetails({ onBackClick, selectedEntrepriseId }: Entrepr
     const fetchEntrepriseDetails = async () => {
       if (selectedEntrepriseId) {
         try {
-          const response = await fetch(`http://localhost:9192/api/entreprises/${selectedEntrepriseId}`);
+          const token = localStorage.getItem('authToken');
+
+          const response = await fetch(`http://localhost:9192/api/entreprises/${selectedEntrepriseId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+  
+          });
           if (!response.ok) {
             throw new Error('Failed to fetch entreprise details');
           }
@@ -109,10 +116,21 @@ export function EntrepriseDetails({ onBackClick, selectedEntrepriseId }: Entrepr
     };
 
     const fetchSelectData = async () => {
-      try {
+      try {        const token = localStorage.getItem('authToken');
+
         const [secteursResponse, formesResponse] = await Promise.all([
-          fetch('http://localhost:9192/api/secteursDactivite'),
-          fetch('http://localhost:9192/api/formesJuridiques'),
+          fetch('http://localhost:9192/api/secteursDactivite', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, // Ajout du token dans les en-têtes
+            },
+        }),
+        fetch('http://localhost:9192/api/formesJuridiques', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, // Ajout du token dans les en-têtes
+            },
+        })
         ]);
 
         if (!secteursResponse.ok || !formesResponse.ok) {
@@ -262,10 +280,16 @@ const newId = Array.isArray(prev[field]) && prev[field].every(item => typeof ite
                 formDataToSend.append(typedKey, value.toString());
             }
         });
+        const token = localStorage.getItem('authToken');
 
         const response = await fetch(`http://localhost:9192/api/entreprises/${selectedEntrepriseId}`, {
             method: 'PATCH',
             body: formDataToSend,
+          
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+    
         });
 
         const responseData = await response.text();

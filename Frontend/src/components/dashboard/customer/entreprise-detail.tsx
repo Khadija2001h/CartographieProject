@@ -99,7 +99,15 @@ export function EntrepriseDetails(): React.JSX.Element {
   React.useEffect(() => {
     const fetchEntrepriseDetails = async () => {
       try {
-        const entrepriseResponse = await axios.get(`http://localhost:9192/api/entreprises/${id}`);
+        const token = localStorage.getItem('authToken');
+
+        const entrepriseResponse = await axios.get(`http://localhost:9192/api/entreprises/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+
+        });
+
         setEntreprise(entrepriseResponse.data);
       } catch (error) {
         console.error("Erreur lors de la récupération des détails de l'entreprise", error);

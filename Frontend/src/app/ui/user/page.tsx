@@ -14,10 +14,10 @@ export function PageDetail(): React.JSX.Element {
   return (
     <Router>
       <Routes>
-        <Route path="/dashboard/customers" element={<UserPage />} />
+        <Route path="/ui/user" element={<UserPage />} />
         <Route path="/entreprises/:id" element={<EntrepriseDetails />} />
         <Route path="/" element={<Home />} />
-        <Route path="*" element={<Navigate to="/" />} /> {/* Default route */}
+        <Route path="*" element={<Home />} /> {/* Default route */}
       </Routes>
     </Router>
   );

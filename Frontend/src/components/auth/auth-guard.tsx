@@ -1,55 +1,55 @@
-'use client';
+'use client'; // Ajoutez ceci en haut du fichier
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import Alert from '@mui/material/Alert';
-
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation'; // Utilisez `next/navigation` pour Next.js
+import axios from 'axios';
 import { paths } from '@/paths';
-import { logger } from '@/lib/default-logger';
-import { useUser } from '@/hooks/use-user';
 
-export interface AuthGuardProps {
+interface AuthGuardProps {
   children: React.ReactNode;
 }
 
-export function AuthGuard({ children }: AuthGuardProps): React.JSX.Element | null {
-  const router = useRouter();
-  const { user, error, isLoading } = useUser();
-  const [isChecking, setIsChecking] = React.useState<boolean>(true);
+const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const router = useRouter(); // Utilisez `useRouter` pour la navigation dans Next.js
 
-  const checkPermissions = async (): Promise<void> => {
-    if (isLoading) {
-      return;
-    }
+  useEffect(() => {
+    const checkPermissions = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
 
-    if (error) {
-      setIsChecking(false);
-      return;
-    }
+        if (!token) {
+          router.replace(paths.auth.signIn); // Utilisez `router.replace` pour la redirection
+          return;
+        }
 
-    if (!user) {
-      logger.debug('[AuthGuard]: User is not logged in, redirecting to sign in');
-      router.replace(paths.auth.signIn);
-      return;
-    }
+        const response = await axios.get('http://localhost:9192/api/v1/auth/validate-token', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    setIsChecking(false);
-  };
+        if (response.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          router.replace(paths.auth.signIn);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification des permissions:', error);
+        setIsAuthenticated(false);
+        router.replace(paths.auth.signIn);
+      }
+    };
 
-  React.useEffect(() => {
-    checkPermissions().catch(() => {
-      // noop
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Expected
-  }, [user, error, isLoading]);
+    checkPermissions();
+  }, [router]); // Assurez-vous d'inclure `router` dans les dépendances
 
-  if (isChecking) {
-    return null;
+  if (isAuthenticated === null) {
+    return <div>Chargement...</div>;
   }
 
-  if (error) {
-    return <Alert color="error">{error}</Alert>;
-  }
+  return isAuthenticated ? <>{children}</> : null;
+};
 
-  return <React.Fragment>{children}</React.Fragment>;
-}
+export default AuthGuard;

@@ -21,6 +21,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import EditIcon from '@mui/icons-material/Edit';
 import {EntrepriseDetails} from './EntrepriseDetails';
+import * as XLSX from 'xlsx'; // Import xlsx
+
+
 export interface Entreprise {
   id: string;
   denomination: string;
@@ -46,10 +49,92 @@ export function CustomersTable(): React.JSX.Element {
     navigate(`/entreprises/${id}`); // Use navigate instead of history.push
   };
 
+ 
+//////////////
+const exportToExcel = () => {
+  // Préparer les données
+  const data = entreprises.map((entreprise) => ({
+    Denomination: entreprise.denomination,
+    Adresse: entreprise.adresse,
+    Ville: entreprise.ville,
+    SecteurDactivite: entreprise.secteurDactivite ? entreprise.secteurDactivite.nom : 'N/A',
+    FormeJuridique: entreprise.formeJuridique ? entreprise.formeJuridique.nom : 'N/A',
+  }));
+
+  // Créer une feuille de calcul à partir des données
+  const worksheet = XLSX.utils.json_to_sheet(data);
+
+  // Définir des styles pour les titres (première ligne)
+  const titleStyle = {
+    font: { bold: true, sz: 16, color: { rgb: 'FFFFFF' } }, // Style de police (taille, couleur blanche)
+    fill: { fgColor: { rgb: '87CEEB' } }, // Couleur de fond bleu ciel
+    alignment: { horizontal: 'center', vertical: 'center' }, // Centrer le texte
+    border: {
+      top: { style: 'thick', color: { rgb: '000000' } }, // Bordure épaisse
+      bottom: { style: 'thick', color: { rgb: '000000' } },
+      left: { style: 'thick', color: { rgb: '000000' } },
+      right: { style: 'thick', color: { rgb: '000000' } },
+    },
+  };
+
+  // Appliquer le style aux titres
+  const columnTitles = Object.keys(data[0]);
+  columnTitles.forEach((title, index) => {
+    const cellAddress = XLSX.utils.encode_cell({ c: index, r: 0 });
+    if (!worksheet[cellAddress]) worksheet[cellAddress] = { v: title }; // Si la cellule n'existe pas, la créer avec le titre
+    worksheet[cellAddress].s = titleStyle; // Appliquer le style défini à chaque cellule de titre
+  });
+
+  // Définir un style pour le contenu des cellules
+  const contentStyle = {
+    font: { sz: 12, color: { rgb: '000000' } },
+    alignment: { horizontal: 'left', vertical: 'center' },
+    border: {
+      top: { style: 'thin', color: { rgb: '000000' } }, // Bordure fine
+      bottom: { style: 'thin', color: { rgb: '000000' } },
+      left: { style: 'thin', color: { rgb: '000000' } },
+      right: { style: 'thin', color: { rgb: '000000' } },
+    },
+  };
+
+  // Appliquer le style aux cellules du contenu
+  Object.keys(worksheet).forEach((cell) => {
+    if (cell[0] === '!') return; // Ignorer les métadonnées (par exemple !ref ou !cols)
+    worksheet[cell].s = contentStyle; // Appliquer le style à chaque cellule individuellement
+  });
+
+  // Ajuster la largeur des colonnes pour un meilleur affichage
+  const columnWidths = [
+    { wch: 20 }, // Denomination
+    { wch: 30 }, // Adresse
+    { wch: 15 }, // Ville
+    { wch: 25 }, // SecteurDactivite
+    { wch: 25 }, // FormeJuridique
+  ];
+  worksheet['!cols'] = columnWidths;
+
+  // Créer le workbook et y ajouter la feuille
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Entreprises');
+
+  // Exporter le fichier Excel
+  XLSX.writeFile(workbook, 'entreprises.xlsx');
+};
+
+  
+////////////////////////
   // Fetch entreprises data from API
   const fetchEntreprises = async () => {
     try {
-      const response = await fetch('http://localhost:9192/api/entreprises');
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch('http://localhost:9192/api/entreprises', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch entreprises');
       }
@@ -64,6 +149,18 @@ export function CustomersTable(): React.JSX.Element {
   React.useEffect(() => {
     fetchEntreprises();
   }, []);
+
+  ///////////
+  React.useEffect(() => {
+    const handleExport = () => exportToExcel();
+
+    window.addEventListener('exportToExcel', handleExport);
+
+    return () => {
+      window.removeEventListener('exportToExcel', handleExport);
+    };
+  }, [exportToExcel]);
+  //////////
 
   // Memoize row IDs for selection
   const rowIds = React.useMemo(() => {
@@ -95,8 +192,16 @@ export function CustomersTable(): React.JSX.Element {
       if (filters.formeJuridiqueNom) queryParams.append('formeJuridiqueNom', filters.formeJuridiqueNom);
       if (filters.secteurNom) queryParams.append('secteurNom', filters.secteurNom);
       if (filters.denomination) queryParams.append('denomination', filters.denomination);
+      const token = localStorage.getItem('authToken');
 
-      const response = await fetch(`http://localhost:9192/api/entreprises/filter?${queryParams.toString()}`);
+      const response = await fetch(`http://localhost:9192/api/entreprises/filter?${queryParams.toString()}`, {
+       
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch filtered entreprises');
       }
@@ -117,9 +222,16 @@ export function CustomersTable(): React.JSX.Element {
   };
   const handleDelete = async (id: string) => {
     try {
+      const token = localStorage.getItem('authToken');
+
       const response = await fetch(`http://localhost:9192/api/entreprises/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+
       });
+
 
       if (!response.ok) {
         throw new Error('Failed to delete entreprise');
