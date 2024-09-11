@@ -87,7 +87,7 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
             try {        const token = localStorage.getItem('authToken');
 
                 const response = await axios.get('http://localhost:9192/api/formesJuridiques', {
-                    method: 'POST',
+                    
                     headers: {
                       'Authorization': `Bearer ${token}`,
                     },
@@ -107,7 +107,7 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
             try {        const token = localStorage.getItem('authToken');
 
                 const response = await axios.get('http://localhost:9192/api/secteursDactivite', {
-                    method: 'POST',
+                    
                     headers: {
                       'Authorization': `Bearer ${token}`,
                     },
