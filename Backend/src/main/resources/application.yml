@@ -1,0 +1,31 @@
+server:
+  port: 9192
+
+spring:
+  datasource:
+    username: root
+    url: jdbc:mysql://localhost:3306/Cartographie
+    password: Root123root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  servlet:
+    multipart:
+      max-request-size: 5MB
+      max-file-size: 5MB
+      file-size-threshold: 5MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kati98tita@gmail.com
+    password: cepi tsbq uhbj zppm
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
