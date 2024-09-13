@@ -1,8 +1,11 @@
+// src/components/dashboard/integrations/Map.tsx
+
 import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import L from 'leaflet';
+import HeatmapLayer from 'react-leaflet-heatmap-layer-v3'; // Assurez-vous d'importer ici
 import { Filters } from './EntreprisesFilters';
 import { Alert, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -58,9 +61,7 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
-
         });
-
 
         if (Array.isArray(response.data)) {
           const validEnterprises = response.data.filter((e: Enterprise) => e.latitude !== null && e.longitude !== null);
@@ -132,7 +133,7 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
           <Circle
             key={enterprise.id}
             center={[enterprise.latitude!, enterprise.longitude!]}
-            radius={1000} // 100 meters
+            radius={2500} // 100 meters
             pathOptions={{ color: 'darkred' }}
           >
             <Popup>
@@ -153,6 +154,22 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
             </Popup>
           </Circle>
         ))}
+        
+        {/* Heatmap Layer */}
+        {enterprises.length > 0 && (
+  <HeatmapLayer
+    fitBoundsOnLoad={true}
+    fitBoundsOnUpdate={true}
+    points={enterprises.map((e) => [e.latitude as number, e.longitude as number, 1])}
+    longitudeExtractor={(m: [number, number, number]) => m[1]}
+    latitudeExtractor={(m: [number, number, number]) => m[0]}
+    intensityExtractor={(m: [number, number, number]) => m[2]}
+    max={1}
+    radius={25}
+    blur={15}
+    minOpacity={0.4}
+  />
+)}
       </MapContainer>
     </Box>
   );

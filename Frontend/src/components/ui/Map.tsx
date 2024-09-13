@@ -132,7 +132,7 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
           <Circle
             key={enterprise.id}
             center={[enterprise.latitude!, enterprise.longitude!]}
-            radius={1000} // 100 meters
+            radius={2500} // 100 meters
             pathOptions={{ color: 'darkred' }}
           >
             <Popup>

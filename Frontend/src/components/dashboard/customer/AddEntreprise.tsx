@@ -104,7 +104,8 @@ const AddEntreprise: React.FC<AddEntrepriseProps> = ({ open, handleClose }) => {
 
     useEffect(() => {
         const fetchSecteursActivite = async () => {
-            try {        const token = localStorage.getItem('authToken');
+            try {       
+                 const token = localStorage.getItem('authToken');
 
                 const response = await axios.get('http://localhost:9192/api/secteursDactivite', {
                     
