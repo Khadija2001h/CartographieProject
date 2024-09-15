@@ -69,10 +69,39 @@ const validFields: Record<string, keyof Entreprise> = {
   SecteurDactivite: "secteurId",
 };
 
-// Fonction pour mapper les données Excel aux champs backend
-const mapExcelToBackendFields = (row: Record<string, any>, headers: string[]): Entreprise => {
-  const entreprise: Entreprise = {};
+// Fonction pour récupérer les secteurs et formes juridiques depuis le backend
+const fetchSectorsAndLegalForms = async () => {
+  const token = localStorage.getItem('authToken');
 
+  const secteursRes = await fetch("http://localhost:9192/api/secteursDactivite", {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  const secteurs = await secteursRes.json();
+
+  const formesJuridiquesRes = await fetch("http://localhost:9192/api/formesJuridiques", {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  const formesJuridiques = await formesJuridiquesRes.json();
+  
+  return { secteurs, formesJuridiques };
+};
+
+// Fonction pour mapper les données Excel aux champs backend et comparer secteurs/formes
+const mapExcelToBackendFields = (
+  row: Record<string, any>,
+  headers: string[],
+  secteurs: any[],
+  formesJuridiques: any[]
+): Entreprise => {
+  const entreprise: Entreprise = {};
   headers.forEach((header) => {
     const normalizedHeader = header.trim().toLowerCase().replace(/\s+/g, "");
     const fieldKey = validFields[normalizedHeader as keyof typeof validFields];
@@ -83,6 +112,18 @@ const mapExcelToBackendFields = (row: Record<string, any>, headers: string[]): E
       console.warn(`Colonne "${header}" non reconnue, elle sera ignorée.`);
     }
   });
+
+  // Comparaison secteur d'activité et forme juridique
+  const secteurFromExcel = row['secteur d\'activite']?.toString().toLowerCase();
+  const formeJuridiqueFromExcel = row['forme juridique']?.toString().toLowerCase();
+
+  const secteurMatch = secteurs.find((secteur: any) => secteur.nom && secteur.nom.toLowerCase() === secteurFromExcel);
+  const formeJuridiqueMatch = formesJuridiques.find((forme: any) => forme.nom && forme.nom.toLowerCase() === formeJuridiqueFromExcel);
+
+  console.log({ secteurFromExcel, formeJuridiqueFromExcel, secteurs, formesJuridiques }); // Ajout pour vérification
+
+  if (secteurMatch) entreprise.secteurId = secteurMatch.id;
+  if (formeJuridiqueMatch) entreprise.formeJuridiqueId = formeJuridiqueMatch.id;
 
   // Traitement supplémentaire des champs si nécessaire
   entreprise.capitalSocial = parseFloat(entreprise.capitalSocial?.toString() || "") || 0;
@@ -106,14 +147,14 @@ const mapExcelToBackendFields = (row: Record<string, any>, headers: string[]): E
   entreprise.dateCessationActivite = entreprise.dateCessationActivite
     ? new Date(entreprise.dateCessationActivite).toISOString()
     : null;
-  entreprise.secteurId = parseInt(entreprise.secteurId?.toString() || "") || null;
-  entreprise.formeJuridiqueId = parseInt(entreprise.formeJuridiqueId?.toString() || "") || null;
 
   return entreprise;
 };
 
 // Fonction pour gérer l'importation du fichier Excel
-const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const { secteurs, formesJuridiques } = await fetchSectorsAndLegalForms();
+
   const file = event.target.files?.[0];
   if (file) {
     const reader = new FileReader();
@@ -131,11 +172,11 @@ const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
 
         for (const row of rows) {
           const rowData = headers.reduce((acc: Record<string, any>, header, index) => {
-            acc[header] = row[index] || "";  
+            acc[header] = row[index] || "";
             return acc;
           }, {});
 
-          const entreprise = mapExcelToBackendFields(rowData, headers);
+          const entreprise = mapExcelToBackendFields(rowData, headers, secteurs, formesJuridiques);
 
           try {
             const formData = new FormData();
@@ -144,15 +185,17 @@ const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
                 formData.append(key, value.toString());
               }
             });
+            
             const token = localStorage.getItem('authToken');
             const response = await fetch("http://localhost:9192/api/entreprises/add", {
               method: "POST",
               body: formData,
               headers: {
+                'Content-Type': 'multipart/form-data',
                 'Authorization': `Bearer ${token}`,
               },
             });
-
+           
             if (!response.ok) {
               throw new Error(`Erreur ${response.status}: ${response.statusText}`);
             }
@@ -169,6 +212,8 @@ const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     reader.readAsBinaryString(file);
   }
 };
+
+
 
 // Fonction pour gérer l'exportation du tableau
 const handleExport = () => {
