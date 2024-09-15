@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-le
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import L from 'leaflet';
+import 'leaflet.heat'; // Importation du plugin heatmap
 import { Filters } from './EntreprisesFilters';
 import { Alert, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -24,15 +25,75 @@ const markerIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+// Composant pour gérer le zoom et capturer le niveau de zoom
+const ZoomHandler: React.FC<{ setZoomLevel: (zoom: number) => void }> = ({ setZoomLevel }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    const handleZoomEnd = () => {
+      setZoomLevel(map.getZoom());
+    };
+
+    map.on('zoomend', handleZoomEnd);
+
+    return () => {
+      map.off('zoomend', handleZoomEnd);
+    };
+  }, [map, setZoomLevel]);
+
+  return null;
+};
+
 const ZoomToCity: React.FC<{ city: string, enterprises: Enterprise[] }> = ({ city, enterprises }) => {
   const map = useMap();
 
   useEffect(() => {
-    const cityEnterprise = enterprises.find(e => e.denomination === city && e.latitude !== null && e.longitude !== null);
+    // Chercher une entreprise dans la ville spécifiée
+    const cityEnterprise = enterprises.find(e => e.latitude !== null && e.longitude !== null && e.denomination.toLowerCase().includes(city.toLowerCase()));
+    
     if (cityEnterprise) {
-      map.setView([cityEnterprise.latitude!, cityEnterprise.longitude!], 13);
+      // Centrer la carte sur l'entreprise trouvée
+      map.setView([cityEnterprise.latitude!, cityEnterprise.longitude!], 13); // Zoom à 13
     }
   }, [city, enterprises, map]);
+
+  return null;
+};
+
+const HeatmapLayer: React.FC<{ enterprises: Enterprise[] }> = ({ enterprises }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (enterprises.length > 0) {
+      const heatmapPoints = enterprises
+        .filter((enterprise) => enterprise.latitude !== null && enterprise.longitude !== null)
+        .map((enterprise) => [enterprise.latitude!, enterprise.longitude!, 1]);
+
+      // Effacer les anciennes couches heatmap si nécessaire
+      map.eachLayer(layer => {
+        if (layer instanceof (L as any).HeatLayer) {
+          map.removeLayer(layer);
+        }
+      });
+
+      // Ajouter une nouvelle heatmap pour les entreprises filtrées
+      const heatLayer = (L as any).heatLayer(heatmapPoints, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 12,
+        max: 1.0,
+        minOpacity: 0.5,
+        gradient: {
+          0.1: 'blue',
+          0.4: 'lime',
+          0.7: 'yellow',
+          1.0: 'red'
+        }
+      });
+
+      heatLayer.addTo(map);
+    }
+  }, [enterprises, map]);
 
   return null;
 };
@@ -41,6 +102,7 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [detailedMessageId, setDetailedMessageId] = useState<string | null>(null);
+  const [zoomLevel, setZoomLevel] = useState<number>(10);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,22 +116,17 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
         const token = localStorage.getItem('authToken');
 
         const response = await axios.get(`http://localhost:9192/api/entreprises/filter?${queryParams.toString()}`, {
-          
           headers: {
             'Authorization': `Bearer ${token}`,
           },
-
         });
-
 
         if (Array.isArray(response.data)) {
           const validEnterprises = response.data.filter((e: Enterprise) => e.latitude !== null && e.longitude !== null);
-          
           const enterprisesWithSecteur = validEnterprises.map((e: any) => ({
             ...e,
             secteurActivite: e.secteurDactivite?.nom || 'N/A',
           }));
-          
           setEnterprises(enterprisesWithSecteur);
 
           if (validEnterprises.length === 0) {
@@ -108,7 +165,9 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
           attribution="&copy; <a href='https://osm.org/copyright'>OpenStreetMap</a> contributors"
         />
         {filters.ville && <ZoomToCity city={filters.ville} enterprises={enterprises} />}
-        {enterprises.map((enterprise) => (
+        <HeatmapLayer enterprises={enterprises} />
+        <ZoomHandler setZoomLevel={setZoomLevel} />
+        {zoomLevel >= 12 && enterprises.map((enterprise) => (
           <Marker
             key={enterprise.id}
             position={[enterprise.latitude!, enterprise.longitude!]}
@@ -132,7 +191,7 @@ const Map: React.FC<{ filters: Filters }> = ({ filters }) => {
           <Circle
             key={enterprise.id}
             center={[enterprise.latitude!, enterprise.longitude!]}
-            radius={2500} // 100 meters
+            radius={100}
             pathOptions={{ color: 'darkred' }}
           >
             <Popup>
